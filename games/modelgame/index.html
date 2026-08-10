@@ -10,6 +10,10 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <nav class="site-navigation" aria-label="サイト内ナビゲーション">
+    <a class="site-back-link" href="../../games.html">← Games一覧へ戻る</a>
+  </nav>
+
   <div class="game-shell">
     <header class="game-header" aria-label="ゲームタイトル">
       <div class="header-badge">MM</div>
@@ -22,8 +26,6 @@
         <button id="sfx-button" class="icon-button" type="button" aria-label="効果音を切り替える" aria-pressed="true">SE ON</button>
       </div>
     </header>
-
-    <a class="site-back-link" href="../../games.html">← Games一覧へ戻る</a>
 
     <!-- ゲーム中は画面を移動しても所持道具を確認できます -->
     <section id="global-toolbelt" class="global-toolbelt" aria-label="現在所持している道具">
