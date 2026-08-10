@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#253b3a">
+  <meta name="description" content="30日で戦車模型を完成させ、プラモデルコンテストの頂点を目指すレトロゲーム風シミュレーション">
+  <title>モケイ・マイスター 30DAYS</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="game-shell">
+    <header class="game-header" aria-label="ゲームタイトル">
+      <div class="header-badge">MM</div>
+      <div>
+        <p class="eyebrow">PIXEL MODELING SIMULATOR</p>
+        <h1>モケイ・マイスター <span>30DAYS</span> <small class="app-version" data-app-version>v0.8.0</small></h1>
+      </div>
+      <div class="audio-controls">
+        <button id="bgm-button" class="icon-button" type="button" aria-label="BGMを切り替える" aria-pressed="true">BGM ON</button>
+        <button id="sfx-button" class="icon-button" type="button" aria-label="効果音を切り替える" aria-pressed="true">SE ON</button>
+      </div>
+    </header>
+
+    <!-- ゲーム中は画面を移動しても所持道具を確認できます -->
+    <section id="global-toolbelt" class="global-toolbelt" aria-label="現在所持している道具">
+      <span class="toolbelt-label">TOOL BELT</span>
+      <div id="toolbelt-items" class="toolbelt-items">
+        <span class="tool-chip empty">所持工具なし</span>
+      </div>
+    </section>
+
+    <main>
+      <!-- タイトル画面 -->
+      <section id="title-screen" class="screen active" aria-labelledby="title-heading">
+        <div class="title-layout">
+          <div class="title-copy">
+            <p class="chapter-label">EPISODE 01 / はじめての模型コンテスト</p>
+            <h2 id="title-heading">その一手が、<br><span>小さな世界</span>を作る。</h2>
+            <p class="lead">
+              コンテストまで、あと30日。毎月のおこづかいと時間を使い、
+              戦車模型を完成させよう。工作、塗装、そして少しの勉強。
+              君の作品は審査員の心を動かせるか？
+            </p>
+            <button id="start-button" class="pixel-button primary huge" type="button">
+              <span>制作をはじめる</span><span aria-hidden="true">▶</span>
+            </button>
+            <button id="continue-button" class="pixel-button secondary continue-button" type="button" hidden>
+              前回の続きから
+            </button>
+            <p class="micro-copy">オートセーブ対応 / 1大会約10〜15分</p>
+          </div>
+
+          <!-- 外部画像を使わず、CSSの四角形だけで作る作業机 -->
+          <div class="workbench-scene" aria-label="ドット絵風の模型工房">
+            <div class="window-pixel"><span></span><span></span><span></span><span></span></div>
+            <div class="shelf">
+              <i class="paint-pot red"></i><i class="paint-pot blue"></i><i class="paint-pot sand"></i>
+              <i class="toolbox-mini"></i>
+            </div>
+            <div class="lamp"><i></i></div>
+            <div class="kit-box-art">
+              <span class="box-label">TANK<br>MODEL</span>
+              <div class="tiny-tank"><i></i></div>
+            </div>
+            <div class="desk">
+              <div class="cutting-mat"></div>
+              <div class="nippers-art"></div>
+              <div class="paintbrush-art"></div>
+            </div>
+            <div class="chair"></div>
+            <div class="scene-caption">MY LITTLE WORKSHOP</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- キット選択画面 -->
+      <section id="kit-screen" class="screen" aria-labelledby="kit-heading">
+        <div class="section-heading">
+          <div>
+            <p id="kit-step-label" class="chapter-label">STEP 01 / 最初の相棒を選ぼう</p>
+            <h2 id="kit-heading">どのキットに挑戦する？</h2>
+          </div>
+          <div class="wallet-display">おこづかい残高 <strong id="kit-money">¥10,000</strong></div>
+        </div>
+        <p class="section-intro">各メーカーのカタログから一台を選びます。高難度キットほど完成時の得点は高くなります。</p>
+        <section class="category-picker" aria-labelledby="category-heading">
+          <div><p class="panel-kicker">ENTRY CLASS</p><h3 id="category-heading">参加部門を選ぶ</h3></div>
+          <div id="contest-category-list" class="category-list"></div>
+        </section>
+        <div id="kit-list" class="kit-grid"></div>
+      </section>
+
+      <!-- メインゲーム画面 -->
+      <section id="game-screen" class="screen" aria-labelledby="game-heading">
+        <div class="game-topbar">
+          <div>
+            <p id="contest-round-label" class="chapter-label">ROUND 01 / 制作進行中</p>
+            <h2 id="game-heading">模型店コンテスト</h2>
+          </div>
+          <section class="weather-strip" aria-label="工房の天気予報">
+            <div class="weather-title"><span>WEATHER</span><small>塗装予報</small></div>
+            <div id="weather-forecast" class="weather-forecast"></div>
+          </section>
+          <div class="deadline-panel">
+            <span><b id="month-number">1</b>か月目・コンテストまで</span>
+            <strong><b id="days-left">30</b> DAYS</strong>
+          </div>
+        </div>
+
+        <div class="game-layout">
+          <div class="main-column">
+            <article class="project-card">
+              <div class="project-visual" aria-hidden="true">
+                <canvas id="project-canvas" class="project-canvas" width="384" height="256"></canvas>
+                <span class="hires-badge">PIXEL ×4</span>
+                <span id="project-condition" class="condition-tag">箱を開けたばかり</span>
+              </div>
+              <div class="project-info">
+                <p id="current-kit-maker">NOW BUILDING</p>
+                <h3 id="current-kit-name">初心者向け戦車キット</h3>
+                <div class="project-meta-row">
+                  <span id="work-stage-label">工程：パーツ切り出し</span>
+                  <span id="dry-status-label">塗装可能</span>
+                </div>
+                <div class="progress-group">
+                  <div class="progress-label"><span>工作工数</span><strong id="build-progress-text">0 / 0</strong></div>
+                  <div class="pixel-meter build"><i id="build-progress-bar"></i></div>
+                </div>
+                <div class="progress-group">
+                  <div class="progress-label"><span>塗装工数</span><strong id="paint-progress-text">0 / 0</strong></div>
+                  <div class="pixel-meter paint"><i id="paint-progress-bar"></i></div>
+                </div>
+                <div class="progress-group">
+                  <div class="progress-label"><span>作品品質</span><strong id="quality-progress-text">0 / 0</strong></div>
+                  <div class="pixel-meter quality quality-meter"><i id="quality-progress-bar"></i><b id="quality-comfort-marker" aria-hidden="true"></b></div>
+                  <small id="quality-guidance" class="quality-guidance">現在のレベルで伸ばしやすい目安を表示します</small>
+                  <span id="quality-change-pop" class="quality-change-pop" role="status" aria-live="polite"></span>
+                </div>
+                <div class="project-resource-grid">
+                  <div class="progress-group compact">
+                    <div class="progress-label"><span>パーツ状態</span><strong id="part-condition-text">60 / 60</strong></div>
+                    <div class="pixel-meter integrity"><i id="part-condition-bar"></i></div>
+                  </div>
+                  <div class="progress-group compact">
+                    <div class="progress-label"><span>塗膜状態</span><strong id="paint-condition-text">50 / 50</strong></div>
+                    <div class="pixel-meter coating"><i id="paint-condition-bar"></i></div>
+                  </div>
+                  <div class="progress-group compact optional-progress">
+                    <div class="progress-label"><span>改造</span><strong id="modification-text">0 / 35</strong></div>
+                    <div class="pixel-meter modification"><i id="modification-bar"></i></div>
+                  </div>
+                  <div class="progress-group compact optional-progress">
+                    <div class="progress-label"><span>ウェザリング</span><strong id="weathering-text">0 / 35</strong></div>
+                    <div class="pixel-meter weathering"><i id="weathering-bar"></i></div>
+                  </div>
+                  <div class="progress-group compact optional-progress">
+                    <div class="progress-label"><span>情景工数</span><strong id="diorama-text">未着手</strong></div>
+                    <div class="pixel-meter diorama"><i id="diorama-bar"></i></div>
+                  </div>
+                  <div class="progress-group compact optional-progress">
+                    <div class="progress-label"><span>情景品質</span><strong id="diorama-quality-text">未着手</strong></div>
+                    <div class="pixel-meter quality"><i id="diorama-quality-bar"></i></div>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <section id="review-panel" class="review-panel" hidden>
+              <div class="review-panel-head">
+                <div><p class="panel-kicker">JUDGE FEEDBACK</p><h3>審査員からの改善課題</h3></div>
+                <strong id="review-progress">0 / 0</strong>
+              </div>
+              <p>完成作品を持ち越した月は、指摘を直して再審査へ備えられます。</p>
+              <ul id="review-task-list" class="review-task-list"></ul>
+            </section>
+
+            <section class="action-panel" aria-labelledby="action-heading">
+              <div class="panel-title-row">
+                <div>
+                  <p class="panel-kicker">TODAY'S ACTION</p>
+                  <h3 id="action-heading">今日は何をする？</h3>
+                </div>
+                <span>1日1回</span>
+              </div>
+              <div class="action-grid">
+                <button class="action-button build-action" data-action="build" type="button">
+                  <i class="action-icon">✂</i><span><strong>工作する</strong><small>体力 -17 / 4手の制作セッション</small></span>
+                </button>
+                <button class="action-button paint-action" data-action="paint" type="button">
+                  <i class="action-icon">▰</i><span><strong>塗装する</strong><small>体力 -18 / 工作60%で解禁</small></span>
+                </button>
+                <button class="action-button" data-action="readBuild" type="button">
+                  <i class="action-icon">本</i><span><strong>工作誌を読む</strong><small>¥800 / 工作スキルUP</small></span>
+                </button>
+                <button class="action-button" data-action="readPaint" type="button">
+                  <i class="action-icon">本</i><span><strong>塗装誌を読む</strong><small>¥800 / 塗装スキルUP</small></span>
+                </button>
+                <button class="action-button" data-action="watchBuild" type="button">
+                  <i class="action-icon">▶</i><span><strong>工作動画を見る</strong><small>無料 / 工作スキル少しUP</small></span>
+                </button>
+                <button class="action-button" data-action="watchPaint" type="button">
+                  <i class="action-icon">▶</i><span><strong>塗装動画を見る</strong><small>無料 / 塗装スキル少しUP</small></span>
+                </button>
+                <button class="action-button shop-action" data-action="shop" type="button">
+                  <i class="action-icon">店</i><span><strong>買い物をする</strong><small>工具・塗料・雑誌を購入</small></span>
+                </button>
+                <button class="action-button rest-action" data-action="rest" type="button">
+                  <i class="action-icon">休</i><span><strong>休む</strong><small>体力 +45</small></span>
+                </button>
+                <button class="action-button customize-action" data-action="customize" type="button">
+                  <i class="action-icon">改</i><span><strong>改造する</strong><small>Lv.3 / 工作55%で解禁</small></span>
+                </button>
+                <button class="action-button weathering-action" data-action="weathering" type="button">
+                  <i class="action-icon">汚</i><span><strong>ウェザリング</strong><small>Lv.4 / 塗装70%で解禁</small></span>
+                </button>
+                <button class="action-button diorama-action" data-action="diorama" type="button">
+                  <i class="action-icon">景</i><span><strong>ジオラマ制作</strong><small>Lv.2 / 車両完成後に制作</small></span>
+                </button>
+                <button class="action-button polish-action" data-action="polish" type="button">
+                  <i class="action-icon">磨</i><span><strong>完成後の最終仕上げ</strong><small>完成車両の細部を1日かけて磨く</small></span>
+                </button>
+                <button class="action-button submit-action" data-action="submit" type="button">
+                  <i class="action-icon">杯</i><span><strong>コンテストへ出品</strong><small>完成後、好きな日に出品</small></span>
+                </button>
+              </div>
+            </section>
+
+            <section class="message-panel" aria-live="polite" aria-atomic="true">
+              <div class="message-title"><span class="status-light"></span>工房日誌</div>
+              <div id="message-log" class="message-log"></div>
+            </section>
+          </div>
+
+          <aside class="status-column" aria-label="プレイヤーの状態">
+            <section class="status-card">
+              <div class="status-card-title"><span>STATUS</span><small>現在の状態</small></div>
+              <div class="money-row"><span>おこづかい残高</span><strong id="money">¥0</strong></div>
+              <p class="allowance-note">毎月のおこづかい <strong id="allowance-amount">¥10,000</strong></p>
+
+              <div class="modeler-level-box">
+                <div><span>MODELER LEVEL</span><strong>Lv.<b id="modeler-level">1</b></strong></div>
+                <div class="experience-row"><small id="experience-text">0 / 70 EXP</small><small id="experience-remaining">あと70 EXP</small></div>
+                <div class="pixel-meter level"><i id="experience-bar"></i><b id="experience-meter-label">0 / 70</b></div>
+              </div>
+
+              <div class="stat-block">
+                <div class="stat-label"><span>体力</span><strong id="energy-text">100 / 100</strong></div>
+                <div class="pixel-meter energy"><i id="energy-bar"></i></div>
+              </div>
+              <div class="stat-block">
+                <div class="stat-label"><span>工作スキル</span><strong id="build-skill">Lv.1.0</strong></div>
+                <div class="pixel-meter skill"><i id="build-skill-bar"></i></div>
+              </div>
+              <div class="stat-block">
+                <div class="stat-label"><span>塗装スキル</span><strong id="paint-skill">Lv.1.0</strong></div>
+                <div class="pixel-meter skill"><i id="paint-skill-bar"></i></div>
+              </div>
+
+              <div class="quality-box">
+                <span>完成時の予想評価</span>
+                <strong id="contest-preview">落選圏</strong>
+                <small id="contest-preview-score">現在の能力から算出</small>
+              </div>
+            </section>
+
+            <section class="equipment-card">
+              <div class="status-card-title"><span>EQUIPMENT</span><small>装備中の工具</small></div>
+              <ul id="equipment-list" class="equipment-list"></ul>
+              <button id="equipment-button" class="pixel-button secondary equipment-button" type="button">装備を変更する</button>
+            </section>
+
+            <section class="technique-card">
+              <div class="status-card-title"><span>TECHNIQUE</span><small>制作技法</small></div>
+              <ul id="technique-list" class="technique-list"></ul>
+            </section>
+
+            <section class="inventory-card">
+              <div class="status-card-title"><span>INVENTORY</span><small>工具・消耗品</small></div>
+              <ul id="inventory-list" class="inventory-list"></ul>
+            </section>
+          </aside>
+        </div>
+      </section>
+
+      <!-- 買い物画面 -->
+      <section id="shop-screen" class="screen" aria-labelledby="shop-heading">
+        <div class="shop-header">
+          <div>
+            <p class="chapter-label">MODEL SHOP / モデラーズ・デポ</p>
+            <h2 id="shop-heading">工具と塗料をそろえよう</h2>
+          </div>
+          <div class="wallet-display">おこづかい残高 <strong id="shop-money">¥0</strong></div>
+        </div>
+        <div class="shop-notice"><span>！</span>工具と技法はモデラーレベルで解禁されます。工具は購入時に自動装備され、装備変更は工房でいつでも行えます。会計すると1日が経過します。</div>
+        <nav id="shop-filters" class="shop-filters" aria-label="商品カテゴリ"></nav>
+        <div id="shop-list" class="shop-grid"></div>
+        <div class="shop-footer">
+          <button id="leave-shop-button" class="pixel-button secondary" type="button">← 工房に戻る</button>
+          <div class="cart-summary">
+            <span>カート <b id="cart-count">0</b>点</span>
+            <strong id="cart-total">¥0</strong>
+            <button id="checkout-button" class="pixel-button primary" type="button" disabled>まとめて購入する</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- コンテスト結果画面 -->
+      <section id="result-screen" class="screen" aria-labelledby="result-heading">
+        <div class="result-layout">
+          <div class="result-stage">
+            <p class="chapter-label light">MODEL CONTEST 2026 / 最終審査</p>
+            <div class="spotlight" aria-hidden="true"></div>
+            <div id="trophy-pixel" class="trophy-pixel" aria-hidden="true"><i></i></div>
+            <p class="result-label">あなたの結果は…</p>
+            <h2 id="result-heading">入選</h2>
+            <p id="result-comment" class="result-comment"></p>
+          </div>
+
+          <div class="score-sheet">
+            <p class="panel-kicker">JUDGE'S SCORE</p>
+            <h3>審査結果</h3>
+            <p id="career-result-label" class="career-result-label"></p>
+            <dl id="score-breakdown" class="score-breakdown"></dl>
+            <div class="total-score"><span>総合得点</span><strong id="total-score">000</strong><small>PTS</small></div>
+            <div class="prize-row"><span>獲得賞金</span><strong id="prize-money">¥0</strong></div>
+            <div class="final-wallet"><span>最終所持金</span><strong id="final-money">¥0</strong></div>
+            <button id="carry-project-button" class="pixel-button primary huge carry-project-button" type="button" hidden>制作中キットを次月へ持ち越す ▶</button>
+            <button id="next-contest-button" class="pixel-button primary huge" type="button">次のコンテストへ ▶</button>
+            <button id="restart-button" class="pixel-button secondary reset-career-button" type="button">最初からやり直す ↻</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- 作業方法の選択とアクシデント対応に使う共通ダイアログ -->
+    <div id="choice-modal" class="choice-modal" hidden>
+      <div class="modal-backdrop"></div>
+      <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="modal-head">
+          <div>
+            <p id="modal-kicker" class="panel-kicker">ACTION SELECT</p>
+            <h2 id="modal-title">作業方法を選ぶ</h2>
+          </div>
+          <button id="modal-close-button" class="modal-close" type="button" aria-label="閉じる">×</button>
+        </div>
+        <p id="modal-description" class="modal-description"></p>
+        <section id="craft-session-hud" class="craft-session-hud" aria-label="制作セッションの状態" hidden>
+          <div><span>残り手数</span><strong id="session-turns">4</strong></div>
+          <div><span>集中力</span><strong id="session-focus">60 / 60</strong></div>
+          <div><span>素材状態</span><strong id="session-integrity">60 / 60</strong></div>
+          <div class="session-condition"><span>手応え</span><strong id="session-condition">ふつう</strong></div>
+          <div class="session-prepared"><span>準備効果</span><strong id="session-prepared">なし</strong></div>
+        </section>
+        <div id="modal-options" class="modal-options"></div>
+      </section>
+    </div>
+
+    <!-- 装備枠と候補を分け、変更前後を比較できる専用画面です -->
+    <div id="equipment-modal" class="equipment-modal" hidden>
+      <div class="modal-backdrop"></div>
+      <section class="equipment-modal-card" role="dialog" aria-modal="true" aria-labelledby="equipment-modal-title">
+        <div class="modal-head">
+          <div><p class="panel-kicker">EQUIPMENT / 日数消費なし</p><h2 id="equipment-modal-title">工具装備を変更する</h2></div>
+          <button id="equipment-close-button" class="modal-close" type="button" aria-label="装備画面を閉じる">×</button>
+        </div>
+        <p class="modal-description">装備品は4枠に1つずつ。紙やすりや接着剤は装備不要の消耗品です。</p>
+        <div id="equipment-slot-tabs" class="equipment-slot-tabs"></div>
+        <section id="equipment-summary" class="equipment-summary"></section>
+        <div id="equipment-candidates" class="equipment-candidates"></div>
+        <section class="equipment-supply-note">
+          <strong>装備不要の消耗品</strong>
+          <p id="equipment-supply-list">所持なし</p>
+        </section>
+      </section>
+    </div>
+
+    <!-- レベルアップを作業画面の上で知らせる小さな通知です -->
+    <aside id="level-up-toast" class="level-up-toast" role="status" aria-live="polite" hidden>
+      <span id="level-up-toast-kicker">MODELER LEVEL UP</span>
+      <strong id="level-up-toast-title">Lv.2</strong>
+      <small id="level-up-toast-detail">新しい技法を学べるようになりました</small>
+    </aside>
+
+    <footer>
+      <span>© PIXEL MODEL WORKSHOP</span>
+      <span>BUILD • PAINT • WIN / <b data-app-version>v0.8.0</b></span>
+    </footer>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
