@@ -129,6 +129,28 @@ button:focus-visible {
   font: 900 12px/1 "Courier New", monospace;
 }
 
+.site-back-link {
+  display: block;
+  padding: 8px 18px;
+  color: var(--cream);
+  background: var(--deep-2);
+  border-bottom: 3px solid var(--line);
+  font: 900 12px/1 "Courier New", monospace;
+  letter-spacing: 0.4px;
+  text-decoration: none;
+}
+
+.site-back-link:hover,
+.site-back-link:focus-visible {
+  color: var(--deep);
+  background: var(--mint);
+}
+
+.site-back-link:focus-visible {
+  outline: 3px solid var(--yellow);
+  outline-offset: -3px;
+}
+
 main {
   min-height: 620px;
 }
